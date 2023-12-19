@@ -99,9 +99,85 @@ object EmployeeDAO {
     val preparedStatement: PreparedStatement = connection.prepareStatement(query)
     preparedStatement.setString(1, name)
 
+
     val rowsAffected = preparedStatement.executeUpdate()
     preparedStatement.close()
 
     rowsAffected > 0
   }
+
+  def getAllEmployeesSortedByName: Seq[Employee] = {
+    val query = "SELECT * FROM employees ORDER BY name"
+    val statement = connection.createStatement()
+    val resultSet = statement.executeQuery(query)
+
+    var employees = Seq.empty[Employee]
+    while (resultSet.next()) {
+      val id = resultSet.getLong("id")
+      val name = resultSet.getString("name")
+      val designation = resultSet.getString("designation")
+
+      employees :+= Employee(id, name, designation)
+    }
+
+    statement.close()
+    employees
+  }
+
+  def getAllEmployeesSortedById: Seq[Employee] = {
+    val query = "SELECT * FROM employees ORDER BY id"
+    val statement = connection.createStatement()
+    val resultSet = statement.executeQuery(query)
+
+    var employees = Seq.empty[Employee]
+    while (resultSet.next()) {
+      val id = resultSet.getLong("id")
+      val name = resultSet.getString("name")
+      val designation = resultSet.getString("designation")
+
+      employees :+= Employee(id, name, designation)
+    }
+
+    statement.close()
+    employees
+  }
+
+  def getEmployeesByName(name: String): Seq[Employee] = {
+    val query = "SELECT * FROM employees WHERE name = ?"
+    val preparedStatement: PreparedStatement = connection.prepareStatement(query)
+    preparedStatement.setString(1, name)
+
+    val resultSet = preparedStatement.executeQuery()
+
+    var employees = Seq.empty[Employee]
+    while (resultSet.next()) {
+      val id = resultSet.getLong("id")
+      val empName = resultSet.getString("name")
+      val designation = resultSet.getString("designation")
+
+      employees :+= Employee(id, empName, designation)
+    }
+
+    preparedStatement.close()
+    employees
+  }
+  def getfilterEmployeeById(id: Long): Option[Employee] = {
+    val query = "SELECT * FROM employees WHERE id = ?"
+    val preparedStatement: PreparedStatement = connection.prepareStatement(query)
+    preparedStatement.setLong(1, id)
+
+    val resultSet = preparedStatement.executeQuery()
+
+    if (resultSet.next()) {
+      val empId = resultSet.getLong("id")
+      val name = resultSet.getString("name")
+      val designation = resultSet.getString("designation")
+
+      val employee = Employee(empId, name, designation)
+      Some(employee)
+    } else {
+      None
+    }
+  }
+
 }
